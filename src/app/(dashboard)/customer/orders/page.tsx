@@ -175,13 +175,13 @@ export default function MyOrdersPage() {
         }
       case 'delivered':
         return { 
-          color: 'bg-gray-100 text-gray-700', 
+          color: 'bg-muted text-foreground', 
           icon: CheckCircle,
           label: 'Delivered'
         }
       default:
         return { 
-          color: 'bg-gray-100 text-gray-700', 
+          color: 'bg-muted text-foreground', 
           icon: Package,
           label: 'Unknown'
         }
@@ -192,7 +192,7 @@ export default function MyOrdersPage() {
     switch (priority) {
       case 'express': return 'bg-orange-100 text-orange-700'
       case 'priority': return 'bg-red-100 text-red-700'
-      default: return 'bg-gray-100 text-gray-600'
+      default: return 'bg-muted text-muted-foreground'
     }
   }
 
@@ -214,17 +214,17 @@ export default function MyOrdersPage() {
     const isExpanded = expandedOrder === order.id
 
     return (
-      <Card className="border border-gray-100 bg-white">
+      <Card className="border border-border bg-background">
         <CardContent className="p-4">
           {/* Order Header */}
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center">
-                <StatusIcon className="h-5 w-5 text-gray-400" />
+              <div className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center">
+                <StatusIcon className="h-5 w-5 text-muted-foreground" />
               </div>
               <div>
-                <h3 className="font-medium text-sm text-gray-800">{order.id}</h3>
-                <p className="text-xs text-gray-500">{formatDate(order.date)}</p>
+                <h3 className="font-medium text-sm text-foreground">{order.id}</h3>
+                <p className="text-xs text-muted-foreground">{formatDate(order.date)}</p>
               </div>
             </div>
             
@@ -245,25 +245,25 @@ export default function MyOrdersPage() {
           {/* Progress Bar */}
           <div className="mb-3">
             <div className="flex justify-between items-center text-xs mb-2">
-              <span className="text-gray-600">Order Progress</span>
-              <span className="text-gray-800 font-medium">{order.progress}%</span>
+              <span className="text-muted-foreground">Order Progress</span>
+              <span className="text-foreground font-medium">{order.progress}%</span>
             </div>
             <Progress value={order.progress} className="h-2" />
             <div className="flex justify-between items-center text-xs mt-1">
-              <span className="text-gray-500">{order.currentLocation}</span>
-              <span className="text-gray-500">Est. {formatDate(order.estimatedDelivery)}</span>
+              <span className="text-muted-foreground">{order.currentLocation}</span>
+              <span className="text-muted-foreground">Est. {formatDate(order.estimatedDelivery)}</span>
             </div>
           </div>
 
           {/* Order Summary */}
           <div className="space-y-2 mb-3">
             <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-600">{order.items.length} item{order.items.length > 1 ? 's' : ''}</span>
-              <span className="font-medium text-gray-800">${order.total.toFixed(2)}</span>
+              <span className="text-muted-foreground">{order.items.length} item{order.items.length > 1 ? 's' : ''}</span>
+              <span className="font-medium text-foreground">${order.total.toFixed(2)}</span>
             </div>
             
             {order.trackingId && (
-              <div className="flex justify-between items-center text-xs text-gray-500">
+              <div className="flex justify-between items-center text-xs text-muted-foreground">
                 <span>Tracking: {order.trackingId}</span>
                 <span>Delivery: {formatDate(order.estimatedDelivery)}</span>
               </div>
@@ -273,24 +273,24 @@ export default function MyOrdersPage() {
           {/* Items Preview/Details */}
           {!isExpanded ? (
             <div className="mb-3">
-              <p className="text-xs text-gray-500 line-clamp-1">
+              <p className="text-xs text-muted-foreground line-clamp-1">
                 {order.items.map((item: any) => `${item.quantity}x ${item.name}`).join(', ')}
               </p>
             </div>
           ) : (
-            <div className="space-y-3 mb-3 border-t border-gray-100 pt-3">
+            <div className="space-y-3 mb-3 border-t border-border pt-3">
               {order.items.map((item: any, index: number) => (
                 <div key={index} className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gray-50 rounded-lg flex items-center justify-center">
-                    <Package className="h-4 w-4 text-gray-300" />
+                  <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center">
+                    <Package className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <div className="flex-1">
-                    <h4 className="text-sm font-medium text-gray-800">{item.name}</h4>
-                    <p className="text-xs text-gray-500">by {item.vendor}</p>
-                    <p className="text-xs text-gray-600">Qty: {item.quantity} × ${item.price}</p>
+                    <h4 className="text-sm font-medium text-foreground">{item.name}</h4>
+                    <p className="text-xs text-muted-foreground">by {item.vendor}</p>
+                    <p className="text-xs text-muted-foreground">Qty: {item.quantity} × ${item.price}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-medium text-gray-800">
+                    <p className="text-sm font-medium text-foreground">
                       ${(item.price * item.quantity).toFixed(2)}
                     </p>
                   </div>
@@ -300,11 +300,11 @@ export default function MyOrdersPage() {
           )}
 
           {/* Action Buttons */}
-          <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+          <div className="flex items-center justify-between pt-2 border-t border-border">
             <Button
               variant="ghost"
               size="sm"
-              className="text-xs text-gray-600 hover:text-gray-800 h-7"
+              className="text-xs text-muted-foreground hover:text-foreground h-7"
               onClick={() => toggleOrderExpansion(order.id)}
             >
               {isExpanded ? 'Show Less' : 'View Details'}
@@ -315,19 +315,19 @@ export default function MyOrdersPage() {
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="h-7 w-7 p-0 text-gray-500 hover:text-gray-700"
+                  className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
                   onClick={() => setSelectedTab('tracking')}
                 >
                   <Eye className="h-3 w-3" />
                 </Button>
               )}
               
-              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-gray-500 hover:text-gray-700">
+              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground">
                 <MessageCircle className="h-3 w-3" />
               </Button>
               
               {order.canCancel && (
-                <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-gray-500 hover:text-red-600">
+                <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-muted-foreground hover:text-red-600">
                   <AlertCircle className="h-3 w-3" />
                 </Button>
               )}
@@ -339,9 +339,9 @@ export default function MyOrdersPage() {
   }
 
   const TrackingView = ({ order }: { order: any }) => (
-    <Card className="border border-gray-100 bg-white">
+    <Card className="border border-border bg-background">
       <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-sm font-medium text-gray-700">
+        <CardTitle className="flex items-center gap-2 text-sm font-medium text-foreground">
           <MapPin className="h-4 w-4" />
           Order Tracking - {order.id}
         </CardTitle>
@@ -349,11 +349,11 @@ export default function MyOrdersPage() {
       <CardContent>
         <div className="space-y-4">
           {/* Current Status */}
-          <div className="bg-gray-50 p-3 rounded-lg">
+          <div className="bg-muted p-3 rounded-lg">
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium text-sm text-gray-800">Current Location</p>
-                <p className="text-xs text-gray-600">{order.currentLocation}</p>
+                <p className="font-medium text-sm text-foreground">Current Location</p>
+                <p className="text-xs text-muted-foreground">{order.currentLocation}</p>
               </div>
               <Badge className={`text-xs px-2 py-1 ${getStatusConfig(order.status).color}`} variant="secondary">
                 {getStatusConfig(order.status).label}
@@ -368,7 +368,7 @@ export default function MyOrdersPage() {
                 <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center ${
                   step.completed 
                     ? 'bg-green-100 border-green-500 text-green-700' 
-                    : 'bg-gray-100 border-gray-300 text-gray-500'
+                    : 'bg-muted border-gray-300 text-muted-foreground'
                 }`}>
                   {step.completed ? (
                     <CheckCircle className="h-4 w-4" />
@@ -377,21 +377,21 @@ export default function MyOrdersPage() {
                   )}
                 </div>
                 <div className="flex-1">
-                  <p className={`text-sm font-medium ${step.completed ? 'text-gray-800' : 'text-gray-500'}`}>
+                  <p className={`text-sm font-medium ${step.completed ? 'text-foreground' : 'text-muted-foreground'}`}>
                     {step.step}
                   </p>
-                  <p className="text-xs text-gray-500">{step.date} • {step.time}</p>
+                  <p className="text-xs text-muted-foreground">{step.date} • {step.time}</p>
                 </div>
               </div>
             ))}
           </div>
 
           {/* Estimated Delivery */}
-          <div className="border-t border-gray-100 pt-3">
+          <div className="border-t border-border pt-3">
             <div className="flex items-center gap-2 text-sm">
-              <Home className="h-4 w-4 text-gray-500" />
-              <span className="text-gray-600">Estimated delivery:</span>
-              <span className="font-medium text-gray-800">{formatDate(order.estimatedDelivery)}</span>
+              <Home className="h-4 w-4 text-muted-foreground" />
+              <span className="text-muted-foreground">Estimated delivery:</span>
+              <span className="font-medium text-foreground">{formatDate(order.estimatedDelivery)}</span>
             </div>
           </div>
         </div>
@@ -404,18 +404,18 @@ export default function MyOrdersPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-medium text-gray-700">My Orders</h1>
-          <p className="text-sm text-gray-500">
+          <h1 className="text-xl font-medium text-foreground">My Orders</h1>
+          <p className="text-sm text-muted-foreground">
             Track your current orders and delivery status
           </p>
         </div>
         
         {/* Tab Toggle */}
-        <div className="flex items-center gap-1 border border-gray-200 rounded-md p-0.5">
+        <div className="flex items-center gap-1 border border-border rounded-md p-0.5">
           <Button
             variant={selectedTab === 'active' ? 'default' : 'ghost'}
             size="sm"
-            className={`h-7 text-xs ${selectedTab === 'active' ? 'bg-gray-800 text-white' : 'text-gray-600 hover:text-gray-800'}`}
+            className={`h-7 text-xs ${selectedTab === 'active' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
             onClick={() => setSelectedTab('active')}
           >
             <Package className="h-3 w-3 mr-1" />
@@ -424,7 +424,7 @@ export default function MyOrdersPage() {
           <Button
             variant={selectedTab === 'tracking' ? 'default' : 'ghost'}
             size="sm"
-            className={`h-7 text-xs ${selectedTab === 'tracking' ? 'bg-gray-800 text-white' : 'text-gray-600 hover:text-gray-800'}`}
+            className={`h-7 text-xs ${selectedTab === 'tracking' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
             onClick={() => setSelectedTab('tracking')}
           >
             <MapPin className="h-3 w-3 mr-1" />
@@ -443,15 +443,15 @@ export default function MyOrdersPage() {
         ].map((stat, index) => {
           const Icon = stat.icon
           return (
-            <Card key={index} className="border border-gray-100 bg-white">
+            <Card key={index} className="border border-border bg-background">
               <CardContent className="p-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <Icon className="h-4 w-4 text-gray-600" />
+                  <div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center">
+                    <Icon className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <div>
-                    <p className="text-lg font-medium text-gray-800">{stat.value}</p>
-                    <p className="text-xs text-gray-500">{stat.label}</p>
+                    <p className="text-lg font-medium text-foreground">{stat.value}</p>
+                    <p className="text-xs text-muted-foreground">{stat.label}</p>
                   </div>
                 </div>
               </CardContent>
@@ -468,14 +468,14 @@ export default function MyOrdersPage() {
               <ActiveOrderCard key={order.id} order={order} />
             ))
           ) : (
-            <Card className="text-center py-8 border border-gray-100 bg-white">
+            <Card className="text-center py-8 border border-border bg-background">
               <CardContent>
-                <Package className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                <h3 className="text-base font-medium text-gray-700 mb-2">No active orders</h3>
-                <p className="text-sm text-gray-500 mb-4">
+                <Package className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                <h3 className="text-base font-medium text-foreground mb-2">No active orders</h3>
+                <p className="text-sm text-muted-foreground mb-4">
                   You dont have any orders in progress
                 </p>
-                <Button className="bg-gray-800 hover:bg-gray-700 text-white">
+                <Button className="bg-gray-800 hover:bg-primary/90 text-white">
                   Start Shopping
                 </Button>
               </CardContent>
@@ -491,11 +491,11 @@ export default function MyOrdersPage() {
             ))}
           
           {mockActiveOrders.filter(order => order.trackingId).length === 0 && (
-            <Card className="text-center py-8 border border-gray-100 bg-white">
+            <Card className="text-center py-8 border border-border bg-background">
               <CardContent>
-                <MapPin className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                <h3 className="text-base font-medium text-gray-700 mb-2">No trackable orders</h3>
-                <p className="text-sm text-gray-500">
+                <MapPin className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                <h3 className="text-base font-medium text-foreground mb-2">No trackable orders</h3>
+                <p className="text-sm text-muted-foreground">
                   Orders with tracking information will appear here
                 </p>
               </CardContent>
