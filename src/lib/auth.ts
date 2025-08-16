@@ -120,7 +120,7 @@ export class AuthService {
         id: '4',
         name: 'Alice Expert',
         email: 'expert@example.com',
-        role: 'expert', // Changed from 'blockchain-expert' to 'expert'
+        role: 'expert', 
         walletAddress: '0x4567890123456789012345678901234567890123',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()

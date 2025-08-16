@@ -13,16 +13,28 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const { isAuthenticated, isLoading } = useAuth()
+  const { isAuthenticated, isLoading, user } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push('/login')
-    }
-  }, [isAuthenticated, isLoading, router])
+    // Wait until loading finishes
+    if (!isLoading) {
+      // If not authenticated, redirect to login
+      if (!isAuthenticated) {
+        router.push('/login')
+        return
+      }
 
-  if (isLoading) {
+      // If user has no role yet, redirect to role selection
+      if (isAuthenticated && !user?.role) {
+        router.push('/role-selection')
+        return
+      }
+    }
+  }, [isAuthenticated, isLoading, user, router])
+
+  // Show loading spinner while auth/user is loading
+  if (isLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner />
@@ -30,6 +42,7 @@ export default function DashboardLayout({
     )
   }
 
+  // Fallback in case user is not authenticated
   if (!isAuthenticated) {
     return null
   }
