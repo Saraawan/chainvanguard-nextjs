@@ -35,6 +35,7 @@ export function DashboardSidebar() {
       case "supplier":
         return [
           { href: "/supplier", label: "Dashboard", icon: Home },
+          { href: "/supplier/add-product", label: "Add Product", icon: Plus },
           { href: "/supplier/products", label: "Products", icon: Package },
           { href: "/supplier/inventory", label: "Inventory", icon: Warehouse },
           {
@@ -43,7 +44,7 @@ export function DashboardSidebar() {
             icon: History,
           },
           { href: "/supplier/vendors", label: "Vendors", icon: Users },
-          { href: "/supplier/analytics", label: "Analytics", icon: BarChart },
+          { href: "/supplier/insights", label: "Insights", icon: BarChart },
         ];
 
       // 2. Vendor
@@ -54,7 +55,7 @@ export function DashboardSidebar() {
           { href: "/vendor/my-products", label: "My Products", icon: Package },
           { href: "/vendor/orders", label: "Orders", icon: ShoppingCart },
           { href: "/vendor/customers", label: "Customers", icon: Users },
-          { href: "/vendor/insights", label: "Analytics", icon: TrendingUp },
+          { href: "/vendor/insights", label: "Insights", icon: TrendingUp },
           {
             href: "/vendor/history",
             label: "Sales History",

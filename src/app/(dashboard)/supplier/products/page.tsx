@@ -44,37 +44,42 @@ import {
   Grid3X3,
   List,
   SlidersHorizontal,
-  Star,
   Copy,
-  ExternalLink,
-  MoreHorizontal,
+  Factory,
+  Building2,
+  Globe,
+  Shield,
+  Truck,
 } from "lucide-react";
 import { useAuth } from "@/components/providers/auth-provider";
 import { Product } from "@/types";
 import { toast } from "sonner";
 
+// Supplier-specific categories
 const categories = [
   "All Categories",
-  "Electronics",
-  "Clothing",
-  "Food & Beverages",
-  "Accessories",
-  "Home & Garden",
-  "Books",
-  "Sports & Recreation",
-  "Health & Beauty",
-  "Automotive",
-  "Tools & Hardware",
-  "Toys & Games",
-  "Office Supplies",
+  "Raw Materials",
+  "Electronics Components",
+  "Textiles & Fabrics",
+  "Chemical Products",
+  "Machinery & Equipment",
+  "Automotive Parts",
+  "Construction Materials",
+  "Agricultural Products",
+  "Medical Supplies",
+  "Industrial Equipment",
+  "Packaging Materials",
+  "Energy & Utilities",
+  "Food Ingredients",
+  "Metal & Alloys",
 ];
 
 const statusOptions = [
   "All Status",
   "active",
-  "inactive", 
+  "inactive",
   "out-of-stock",
-  "discontinued"
+  "discontinued",
 ];
 
 const sortOptions = [
@@ -88,7 +93,7 @@ const sortOptions = [
   { value: "oldest", label: "Oldest First" },
 ];
 
-export default function MyProductsPage() {
+export default function SupplierProductsPage() {
   const { user } = useAuth();
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
@@ -103,7 +108,7 @@ export default function MyProductsPage() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
 
-  // Edit form state
+  // Edit form state with supplier-specific fields
   const [editForm, setEditForm] = useState({
     name: "",
     description: "",
@@ -111,6 +116,10 @@ export default function MyProductsPage() {
     price: "",
     quantity: "",
     status: "active" as Product["status"],
+    minimumOrderQuantity: "",
+    origin: "",
+    certifications: "",
+    warranty: "",
   });
 
   useEffect(() => {
@@ -120,12 +129,65 @@ export default function MyProductsPage() {
   const loadProducts = () => {
     setIsLoading(true);
     try {
-      const savedProducts = localStorage.getItem(`vendor_${user?.id}_products`);
+      const savedProducts = localStorage.getItem(
+        `supplier_${user?.id}_products`
+      );
       if (savedProducts) {
         setProducts(JSON.parse(savedProducts));
+      } else {
+        // Initialize with some sample supplier products if none exist
+        const sampleProducts: Product[] = [
+          {
+            id: "1",
+            name: "Industrial Steel Rods",
+            description:
+              "High-grade steel rods for construction and manufacturing industries",
+            category: "Raw Materials",
+            price: 45.99,
+            quantity: 500,
+            status: "active",
+            supplierId: user?.id || "supplier-1",
+            supplierName: user?.name || "Supplier",
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            sku: "ISR-001",
+            minimumOrderQuantity: 50,
+            origin: "USA",
+            certifications: "ISO 9001, ASTM A36",
+            warranty: "2 years",
+            weight: "25kg per rod",
+            material: "Carbon Steel",
+          },
+          {
+            id: "2",
+            name: "Organic Cotton Fabric",
+            description:
+              "Premium organic cotton fabric for textile manufacturing",
+            category: "Textiles & Fabrics",
+            price: 12.5,
+            quantity: 2000,
+            status: "active",
+            supplierId: user?.id || "supplier-1",
+            supplierName: user?.name || "Supplier",
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            sku: "OCF-002",
+            minimumOrderQuantity: 100,
+            origin: "India",
+            certifications: "GOTS, OEKO-TEX",
+            warranty: "Quality guarantee",
+            weight: "200gsm",
+            material: "100% Organic Cotton",
+          },
+        ];
+        setProducts(sampleProducts);
+        localStorage.setItem(
+          `supplier_${user?.id}_products`,
+          JSON.stringify(sampleProducts)
+        );
       }
     } catch (error) {
-      toast.error("Failed to load products");
+      toast.error("Failed to load supply products");
       console.error("Error loading products:", error);
     } finally {
       setIsLoading(false);
@@ -135,7 +197,7 @@ export default function MyProductsPage() {
   const saveProducts = (updatedProducts: Product[]) => {
     setProducts(updatedProducts);
     localStorage.setItem(
-      `vendor_${user?.id}_products`,
+      `supplier_${user?.id}_products`,
       JSON.stringify(updatedProducts)
     );
   };
@@ -147,7 +209,9 @@ export default function MyProductsPage() {
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (product.sku &&
-          product.sku.toLowerCase().includes(searchTerm.toLowerCase()));
+          product.sku.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (product.origin &&
+          product.origin.toLowerCase().includes(searchTerm.toLowerCase()));
 
       const matchesCategory =
         selectedCategory === "All Categories" ||
@@ -175,9 +239,13 @@ export default function MyProductsPage() {
         case "quantity-desc":
           return b.quantity - a.quantity;
         case "newest":
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
         case "oldest":
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          return (
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
         default:
           return 0;
       }
@@ -195,6 +263,10 @@ export default function MyProductsPage() {
       price: product.price.toString(),
       quantity: product.quantity.toString(),
       status: product.status,
+      minimumOrderQuantity: product.minimumOrderQuantity?.toString() || "",
+      origin: product.origin || "",
+      certifications: product.certifications || "",
+      warranty: product.warranty || "",
     });
     setIsEditOpen(true);
   };
@@ -210,6 +282,10 @@ export default function MyProductsPage() {
       price: parseFloat(editForm.price),
       quantity: parseInt(editForm.quantity),
       status: editForm.status,
+      minimumOrderQuantity: parseInt(editForm.minimumOrderQuantity) || 1,
+      origin: editForm.origin,
+      certifications: editForm.certifications,
+      warranty: editForm.warranty,
       updatedAt: new Date().toISOString(),
     };
 
@@ -220,7 +296,7 @@ export default function MyProductsPage() {
 
     setIsEditOpen(false);
     setEditingProduct(null);
-    toast.success("Product updated successfully!");
+    toast.success("Supply product updated successfully!");
   };
 
   const handleDelete = (product: Product) => {
@@ -236,18 +312,21 @@ export default function MyProductsPage() {
 
     setIsDeleteOpen(false);
     setDeletingProduct(null);
-    toast.success("Product deleted successfully!");
+    toast.success("Supply product deleted successfully!");
   };
 
   const handleToggleStatus = (product: Product) => {
-    const newStatus: Product["status"] = product.status === "active" ? "inactive" : "active";
+    const newStatus: Product["status"] =
+      product.status === "active" ? "inactive" : "active";
     const updatedProducts = products.map((p) =>
       p.id === product.id
         ? { ...p, status: newStatus, updatedAt: new Date().toISOString() }
         : p
     );
     saveProducts(updatedProducts);
-    toast.success(`Product ${newStatus === "active" ? "activated" : "deactivated"}`);
+    toast.success(
+      `Supply product ${newStatus === "active" ? "activated" : "deactivated"}`
+    );
   };
 
   const handleDuplicate = (product: Product) => {
@@ -255,13 +334,14 @@ export default function MyProductsPage() {
       ...product,
       id: Date.now().toString(),
       name: `${product.name} (Copy)`,
+      sku: product.sku ? `${product.sku}-COPY` : undefined,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
 
     const updatedProducts = [...products, duplicatedProduct];
     saveProducts(updatedProducts);
-    toast.success("Product duplicated successfully!");
+    toast.success("Supply product duplicated successfully!");
   };
 
   const getStatusColor = (status: string) => {
@@ -279,14 +359,22 @@ export default function MyProductsPage() {
     }
   };
 
-  const getStockStatus = (quantity: number) => {
-    if (quantity === 0) return { text: "Out of Stock", color: "text-red-600 dark:text-red-400" };
-    if (quantity < 10) return { text: "Low Stock", color: "text-orange-600 dark:text-orange-400" };
+  const getStockStatus = (quantity: number, minOrder: number = 1) => {
+    if (quantity === 0)
+      return { text: "Out of Stock", color: "text-red-600 dark:text-red-400" };
+    if (quantity < minOrder * 2)
+      return {
+        text: "Low Stock",
+        color: "text-orange-600 dark:text-orange-400",
+      };
     return { text: "In Stock", color: "text-green-600 dark:text-green-400" };
   };
 
   const ProductCard = ({ product }: { product: Product }) => {
-    const stockStatus = getStockStatus(product.quantity);
+    const stockStatus = getStockStatus(
+      product.quantity,
+      product.minimumOrderQuantity
+    );
 
     return (
       <Card className="group hover:shadow-md transition-all duration-200 border border-border bg-card">
@@ -300,7 +388,7 @@ export default function MyProductsPage() {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <Package className="h-16 w-16 text-muted-foreground" />
+                <Factory className="h-16 w-16 text-muted-foreground" />
               )}
             </div>
 
@@ -310,7 +398,7 @@ export default function MyProductsPage() {
                 variant="outline"
                 size="sm"
                 className="h-8 w-8 p-0 bg-background/90 hover:bg-background border-border"
-                onClick={() => router.push(`/vendor/products/${product.id}`)}
+                onClick={() => router.push(`/supplier/products/${product.id}`)}
               >
                 <Eye className="h-3.5 w-3.5 text-muted-foreground" />
               </Button>
@@ -341,13 +429,27 @@ export default function MyProductsPage() {
             >
               {product.status}
             </Badge>
+
+            {/* Blockchain indicator */}
+            {product.sku && (
+              <Badge
+                className="absolute top-2 left-2 text-xs px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300"
+                variant="secondary"
+              >
+                <Globe className="h-3 w-3 mr-1" />
+                Blockchain
+              </Badge>
+            )}
           </div>
         </CardHeader>
 
         <CardContent className="p-4">
           <div className="space-y-3">
             {/* Category */}
-            <Badge variant="outline" className="text-xs text-muted-foreground border-border">
+            <Badge
+              variant="outline"
+              className="text-xs text-muted-foreground border-border"
+            >
               {product.category}
             </Badge>
 
@@ -356,23 +458,55 @@ export default function MyProductsPage() {
               {product.name}
             </h3>
 
-            {/* SKU */}
-            {product.sku && (
-              <p className="text-xs text-muted-foreground font-mono">SKU: {product.sku}</p>
-            )}
+            {/* SKU and Origin */}
+            <div className="space-y-1">
+              {product.sku && (
+                <p className="text-xs text-muted-foreground font-mono">
+                  SKU: {product.sku}
+                </p>
+              )}
+              {product.origin && (
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Globe className="h-3 w-3" />
+                  {product.origin}
+                </p>
+              )}
+            </div>
 
             {/* Price and stock */}
             <div className="flex items-center justify-between">
-              <span className="text-lg font-bold text-foreground">
-                ${product.price.toFixed(2)}
-              </span>
+              <div>
+                <span className="text-lg font-bold text-foreground">
+                  ${product.price.toFixed(2)}
+                </span>
+                <p className="text-xs text-muted-foreground">per unit</p>
+              </div>
               <div className="text-right">
                 <p className={`text-sm font-medium ${stockStatus.color}`}>
                   {product.quantity} units
                 </p>
-                <p className="text-xs text-muted-foreground">{stockStatus.text}</p>
+                <p className="text-xs text-muted-foreground">
+                  {stockStatus.text}
+                </p>
               </div>
             </div>
+
+            {/* Min order quantity */}
+            {product.minimumOrderQuantity && (
+              <p className="text-xs text-muted-foreground">
+                Min order: {product.minimumOrderQuantity} units
+              </p>
+            )}
+
+            {/* Certifications */}
+            {product.certifications && (
+              <div className="flex items-center gap-1">
+                <Shield className="h-3 w-3 text-green-600" />
+                <p className="text-xs text-muted-foreground truncate">
+                  {product.certifications}
+                </p>
+              </div>
+            )}
 
             {/* Actions */}
             <div className="flex items-center justify-between pt-2">
@@ -400,14 +534,17 @@ export default function MyProductsPage() {
   };
 
   const ProductListItem = ({ product }: { product: Product }) => {
-    const stockStatus = getStockStatus(product.quantity);
+    const stockStatus = getStockStatus(
+      product.quantity,
+      product.minimumOrderQuantity
+    );
 
     return (
       <Card className="hover:shadow-sm transition-shadow border border-border bg-card">
         <CardContent className="p-4">
           <div className="flex gap-4">
             {/* Image */}
-            <div className="w-20 h-20 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
+            <div className="w-20 h-20 bg-muted rounded-lg flex items-center justify-center flex-shrink-0 relative">
               {product.images && product.images.length > 0 ? (
                 <img
                   src={product.images[0]}
@@ -415,7 +552,15 @@ export default function MyProductsPage() {
                   className="w-full h-full object-cover rounded-lg"
                 />
               ) : (
-                <Package className="h-8 w-8 text-muted-foreground" />
+                <Factory className="h-8 w-8 text-muted-foreground" />
+              )}
+              {product.sku && (
+                <Badge
+                  className="absolute -top-1 -right-1 text-xs px-1 py-0 bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300"
+                  variant="secondary"
+                >
+                  <Globe className="h-2 w-2" />
+                </Badge>
               )}
             </div>
 
@@ -423,22 +568,40 @@ export default function MyProductsPage() {
             <div className="flex-1 space-y-2">
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
-                  <Badge variant="outline" className="text-xs text-muted-foreground border-border">
+                  <Badge
+                    variant="outline"
+                    className="text-xs text-muted-foreground border-border"
+                  >
                     {product.category}
                   </Badge>
-                  <h3 className="font-medium text-foreground">{product.name}</h3>
-                  {product.sku && (
-                    <p className="text-xs text-muted-foreground font-mono">SKU: {product.sku}</p>
-                  )}
+                  <h3 className="font-medium text-foreground">
+                    {product.name}
+                  </h3>
+                  <div className="space-y-0.5">
+                    {product.sku && (
+                      <p className="text-xs text-muted-foreground font-mono">
+                        SKU: {product.sku}
+                      </p>
+                    )}
+                    {product.origin && (
+                      <p className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Globe className="h-3 w-3" />
+                        Origin: {product.origin}
+                      </p>
+                    )}
+                  </div>
                   <p className="text-sm text-muted-foreground line-clamp-2">
                     {product.description}
                   </p>
                 </div>
 
                 <div className="text-right space-y-1">
-                  <span className="text-lg font-bold text-foreground">
-                    ${product.price.toFixed(2)}
-                  </span>
+                  <div>
+                    <span className="text-lg font-bold text-foreground">
+                      ${product.price.toFixed(2)}
+                    </span>
+                    <p className="text-xs text-muted-foreground">per unit</p>
+                  </div>
                   <Badge
                     className={`text-xs px-2 py-1 ${getStatusColor(product.status)}`}
                     variant="secondary"
@@ -454,16 +617,27 @@ export default function MyProductsPage() {
                     <p className={`text-sm font-medium ${stockStatus.color}`}>
                       {product.quantity} units
                     </p>
-                    <p className="text-xs text-muted-foreground">{stockStatus.text}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {stockStatus.text}
+                    </p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">
-                      Created: {new Date(product.createdAt).toLocaleDateString()}
+                      Min order: {product.minimumOrderQuantity || 1} units
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Updated: {new Date(product.updatedAt).toLocaleDateString()}
+                      Updated:{" "}
+                      {new Date(product.updatedAt).toLocaleDateString()}
                     </p>
                   </div>
+                  {product.certifications && (
+                    <div className="flex items-center gap-1">
+                      <Shield className="h-3 w-3 text-green-600" />
+                      <p className="text-xs text-muted-foreground max-w-32 truncate">
+                        {product.certifications}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex gap-2">
@@ -471,7 +645,9 @@ export default function MyProductsPage() {
                     variant="outline"
                     size="sm"
                     className="h-7 w-7 p-0 border-border"
-                    onClick={() => router.push(`/vendor/products/${product.id}`)}
+                    onClick={() =>
+                      router.push(`/supplier/products/${product.id}`)
+                    }
                   >
                     <Eye className="h-3 w-3 text-muted-foreground" />
                   </Button>
@@ -531,7 +707,9 @@ export default function MyProductsPage() {
   // Calculate stats
   const totalProducts = products.length;
   const activeProducts = products.filter((p) => p.status === "active").length;
-  const lowStockProducts = products.filter((p) => p.quantity < 10).length;
+  const lowStockProducts = products.filter(
+    (p) => p.quantity < (p.minimumOrderQuantity || 10) * 2
+  ).length;
   const outOfStockProducts = products.filter((p) => p.quantity === 0).length;
   const totalValue = products.reduce((sum, p) => sum + p.price * p.quantity, 0);
 
@@ -540,9 +718,11 @@ export default function MyProductsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">My Products</h1>
+          <h1 className="text-3xl font-bold text-foreground">
+            Supply Products
+          </h1>
           <p className="text-muted-foreground">
-            Manage your product inventory and track performance
+            Manage your supply catalog and track vendor orders
           </p>
         </div>
 
@@ -575,9 +755,9 @@ export default function MyProductsPage() {
             </Button>
           </div>
 
-          <Button onClick={() => router.push("/vendor/add-product")}>
+          <Button onClick={() => router.push("/supplier/add-product")}>
             <Plus className="h-4 w-4 mr-2" />
-            Add Product
+            Add Supply Product
           </Button>
         </div>
       </div>
@@ -586,64 +766,16 @@ export default function MyProductsPage() {
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <Card className="border border-border bg-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-foreground">Total Products</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">{totalProducts}</div>
-            <p className="text-xs text-muted-foreground">
-              {activeProducts} active
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="border border-border bg-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-foreground">Total Value</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">${totalValue.toFixed(0)}</div>
-            <p className="text-xs text-muted-foreground">Inventory value</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border border-border bg-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-foreground">Low Stock</CardTitle>
-            <AlertCircle className="h-4 w-4 text-orange-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-              {lowStockProducts}
-            </div>
-            <p className="text-xs text-muted-foreground">Products &lt; 10 units</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border border-border bg-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-foreground">Out of Stock</CardTitle>
-            <TrendingDown className="h-4 w-4 text-red-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600 dark:text-red-400">
-              {outOfStockProducts}
-            </div>
-            <p className="text-xs text-muted-foreground">Products at 0 units</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border border-border bg-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-foreground">Categories</CardTitle>
+            <CardTitle className="text-sm font-medium text-foreground">
+              Categories
+            </CardTitle>
             <Filter className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-foreground">
               {new Set(products.map((p) => p.category)).size}
             </div>
-            <p className="text-xs text-muted-foreground">Product categories</p>
+            <p className="text-xs text-muted-foreground">Supply categories</p>
           </CardContent>
         </Card>
       </div>
@@ -663,7 +795,7 @@ export default function MyProductsPage() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search products, SKU..."
+                  placeholder="Search products, SKU, origin..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 h-9 text-sm border-border bg-background"
@@ -672,13 +804,20 @@ export default function MyProductsPage() {
             </div>
 
             {/* Category filter */}
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <Select
+              value={selectedCategory}
+              onValueChange={setSelectedCategory}
+            >
               <SelectTrigger className="h-9 text-sm border-border bg-background">
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
               <SelectContent>
                 {categories.map((category) => (
-                  <SelectItem key={category} value={category} className="text-sm">
+                  <SelectItem
+                    key={category}
+                    value={category}
+                    className="text-sm"
+                  >
                     {category}
                   </SelectItem>
                 ))}
@@ -706,7 +845,11 @@ export default function MyProductsPage() {
               </SelectTrigger>
               <SelectContent>
                 {sortOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value} className="text-sm">
+                  <SelectItem
+                    key={option.value}
+                    value={option.value}
+                    className="text-sm"
+                  >
                     {option.label}
                   </SelectItem>
                 ))}
@@ -717,12 +860,16 @@ export default function MyProductsPage() {
           {/* Results count and active filters */}
           <div className="mt-3 flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
-              {filteredAndSortedProducts.length} of {totalProducts} products
+              {filteredAndSortedProducts.length} of {totalProducts} supply
+              products
             </p>
 
             <div className="flex gap-2">
               {searchTerm && (
-                <Badge variant="secondary" className="text-xs bg-muted text-muted-foreground">
+                <Badge
+                  variant="secondary"
+                  className="text-xs bg-muted text-muted-foreground"
+                >
                   &quot;{searchTerm}&quot;
                   <button
                     onClick={() => setSearchTerm("")}
@@ -733,7 +880,10 @@ export default function MyProductsPage() {
                 </Badge>
               )}
               {selectedCategory !== "All Categories" && (
-                <Badge variant="secondary" className="text-xs bg-muted text-muted-foreground">
+                <Badge
+                  variant="secondary"
+                  className="text-xs bg-muted text-muted-foreground"
+                >
                   {selectedCategory}
                   <button
                     onClick={() => setSelectedCategory("All Categories")}
@@ -744,7 +894,10 @@ export default function MyProductsPage() {
                 </Badge>
               )}
               {selectedStatus !== "All Status" && (
-                <Badge variant="secondary" className="text-xs bg-muted text-muted-foreground">
+                <Badge
+                  variant="secondary"
+                  className="text-xs bg-muted text-muted-foreground"
+                >
                   {selectedStatus}
                   <button
                     onClick={() => setSelectedStatus("All Status")}
@@ -779,19 +932,21 @@ export default function MyProductsPage() {
       ) : (
         <Card className="text-center py-12 border border-border bg-card">
           <CardContent>
-            <Package className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+            <Factory className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-medium text-foreground mb-2">
-              {totalProducts === 0 ? "No Products Yet" : "No Products Found"}
+              {totalProducts === 0
+                ? "No Supply Products Yet"
+                : "No Products Found"}
             </h3>
             <p className="text-sm text-muted-foreground mb-6">
               {totalProducts === 0
-                ? "Start by adding your first product to get started."
+                ? "Start by adding your first supply product to the blockchain network."
                 : "Try adjusting your search terms or filters."}
             </p>
             {totalProducts === 0 ? (
-              <Button onClick={() => router.push("/vendor/add-product")}>
+              <Button onClick={() => router.push("/supplier/add-product")}>
                 <Plus className="h-4 w-4 mr-2" />
-                Add Your First Product
+                Add Your First Supply Product
               </Button>
             ) : (
               <Button
@@ -811,17 +966,21 @@ export default function MyProductsPage() {
 
       {/* Edit Product Dialog */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle className="text-foreground">Edit Product</DialogTitle>
+            <DialogTitle className="text-foreground">
+              Edit Supply Product
+            </DialogTitle>
             <DialogDescription className="text-muted-foreground">
-              Update your product information
+              Update your supply product information
             </DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-4">
               <div>
-                <Label htmlFor="edit-name" className="text-foreground">Product Name</Label>
+                <Label htmlFor="edit-name" className="text-foreground">
+                  Product Name
+                </Label>
                 <Input
                   id="edit-name"
                   value={editForm.name}
@@ -832,7 +991,9 @@ export default function MyProductsPage() {
                 />
               </div>
               <div>
-                <Label htmlFor="edit-category" className="text-foreground">Category</Label>
+                <Label htmlFor="edit-category" className="text-foreground">
+                  Category
+                </Label>
                 <Select
                   value={editForm.category}
                   onValueChange={(value) =>
@@ -852,7 +1013,43 @@ export default function MyProductsPage() {
                 </Select>
               </div>
               <div>
-                <Label htmlFor="edit-description" className="text-foreground">Description</Label>
+                <Label htmlFor="edit-origin" className="text-foreground">
+                  Country of Origin
+                </Label>
+                <Input
+                  id="edit-origin"
+                  value={editForm.origin}
+                  onChange={(e) =>
+                    setEditForm((prev) => ({ ...prev, origin: e.target.value }))
+                  }
+                  className="border-border bg-background"
+                  placeholder="e.g., Made in USA"
+                />
+              </div>
+              <div>
+                <Label
+                  htmlFor="edit-certifications"
+                  className="text-foreground"
+                >
+                  Certifications
+                </Label>
+                <Input
+                  id="edit-certifications"
+                  value={editForm.certifications}
+                  onChange={(e) =>
+                    setEditForm((prev) => ({
+                      ...prev,
+                      certifications: e.target.value,
+                    }))
+                  }
+                  className="border-border bg-background"
+                  placeholder="e.g., ISO 9001, CE, FDA"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-description" className="text-foreground">
+                  Description
+                </Label>
                 <Textarea
                   id="edit-description"
                   value={editForm.description}
@@ -869,7 +1066,9 @@ export default function MyProductsPage() {
             </div>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="edit-price" className="text-foreground">Price ($)</Label>
+                <Label htmlFor="edit-price" className="text-foreground">
+                  Unit Price ($)
+                </Label>
                 <Input
                   id="edit-price"
                   type="number"
@@ -882,7 +1081,9 @@ export default function MyProductsPage() {
                 />
               </div>
               <div>
-                <Label htmlFor="edit-quantity" className="text-foreground">Quantity</Label>
+                <Label htmlFor="edit-quantity" className="text-foreground">
+                  Available Stock
+                </Label>
                 <Input
                   id="edit-quantity"
                   type="number"
@@ -897,7 +1098,43 @@ export default function MyProductsPage() {
                 />
               </div>
               <div>
-                <Label htmlFor="edit-status" className="text-foreground">Status</Label>
+                <Label htmlFor="edit-min-order" className="text-foreground">
+                  Min Order Quantity
+                </Label>
+                <Input
+                  id="edit-min-order"
+                  type="number"
+                  value={editForm.minimumOrderQuantity}
+                  onChange={(e) =>
+                    setEditForm((prev) => ({
+                      ...prev,
+                      minimumOrderQuantity: e.target.value,
+                    }))
+                  }
+                  className="border-border bg-background"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-warranty" className="text-foreground">
+                  Warranty
+                </Label>
+                <Input
+                  id="edit-warranty"
+                  value={editForm.warranty}
+                  onChange={(e) =>
+                    setEditForm((prev) => ({
+                      ...prev,
+                      warranty: e.target.value,
+                    }))
+                  }
+                  className="border-border bg-background"
+                  placeholder="e.g., 2 year warranty"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-status" className="text-foreground">
+                  Status
+                </Label>
                 <Select
                   value={editForm.status}
                   onValueChange={(value: Product["status"]) =>
@@ -921,7 +1158,10 @@ export default function MyProductsPage() {
             <Button variant="outline" onClick={() => setIsEditOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleSaveEdit}>Save Changes</Button>
+            <Button onClick={handleSaveEdit}>
+              <Building2 className="h-4 w-4 mr-2" />
+              Update Supply Product
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -930,10 +1170,13 @@ export default function MyProductsPage() {
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-foreground">Delete Product</DialogTitle>
+            <DialogTitle className="text-foreground">
+              Delete Supply Product
+            </DialogTitle>
             <DialogDescription className="text-muted-foreground">
-              Are you sure you want to delete &quot;{deletingProduct?.name}&quot;? This
-              action cannot be undone.
+              Are you sure you want to delete &quot;{deletingProduct?.name}
+              &quot;? This will remove it from the blockchain supply chain and
+              cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -941,7 +1184,8 @@ export default function MyProductsPage() {
               Cancel
             </Button>
             <Button variant="destructive" onClick={confirmDelete}>
-              Delete Product
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete Supply Product
             </Button>
           </DialogFooter>
         </DialogContent>

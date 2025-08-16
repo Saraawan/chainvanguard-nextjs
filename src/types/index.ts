@@ -42,7 +42,7 @@ export interface Product {
   supplierName: string
   createdAt: string
   updatedAt: string
-  status: 'active' | 'inactive'
+  status: ProductStatus; 
   sku?: string
   weight?: string
   dimensions?: string
@@ -59,11 +59,15 @@ export interface Product {
   minimumOrderQuantity?: number
 }
 
-export type ProductStatus =
-  | "active"
-  | "inactive"
-  | "out-of-stock"
-  | "discontinued";
+export type ProductStatus = 
+  | "active" 
+  | "inactive" 
+  | "out-of-stock" 
+  | "discontinued"
+  | "available"    // for suppliers
+  | "reserved"     // for suppliers  
+  | "sold"         // for suppliers
+  | "pending-approval"; // for suppliers
 
 export interface ProductFormData {
   name: string;
