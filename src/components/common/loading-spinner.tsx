@@ -1,4 +1,3 @@
-// src/components/common/loading-spinner.tsx
 import { cn } from '@/lib/utils'
 
 export function LoadingSpinner({ className }: { className?: string }) {

@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/components/ui/sonner.tsx (if not created by shadcn)
 'use client'
 
 import { useTheme } from 'next-themes'

@@ -1,4 +1,3 @@
-// src/components/common-sidebar.tsx
 "use client";
 
 import { useAuth } from "@/components/providers/auth-provider";
