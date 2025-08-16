@@ -468,3 +468,5 @@ export interface AppConfig {
   ipfsGateway: string;
   enabledFeatures: string[];
 }
+
+

@@ -1,14 +1,28 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  Shield, 
-  Network, 
-  Monitor, 
+import {
+  useState,
+  useEffect,
+  JSXElementConstructor,
+  ReactElement,
+  ReactNode,
+  ReactPortal,
+} from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Shield,
+  Network,
+  Monitor,
   AlertTriangle,
   CheckCircle,
   XCircle,
@@ -18,204 +32,340 @@ import {
   Activity,
   Eye,
   RefreshCw,
-  Settings
-} from 'lucide-react'
-import { useAuth } from '@/components/providers/auth-provider'
-import { BlockchainTransaction, ConsensusNode, NetworkHealth } from '@/types'
-import { toast } from 'sonner'
+  Settings,
+  TrendingUp,
+  TrendingDown,
+  Users,
+  Zap,
+  Hash,
+  Package,
+  CreditCard,
+  Play,
+  Pause,
+  RotateCcw,
+  Download,
+  Lock,
+  Key,
+  Cpu,
+  HardDrive,
+  Wifi,
+} from "lucide-react";
 
-export default function BlockchainExpertDashboard() {
-  const { user } = useAuth()
-  const [transactions, setTransactions] = useState<BlockchainTransaction[]>([])
-  const [nodes, setNodes] = useState<ConsensusNode[]>([])
-  const [networkHealth, setNetworkHealth] = useState<NetworkHealth | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+// Type definitions
+type StatusType =
+  | "online"
+  | "offline"
+  | "syncing"
+  | "confirmed"
+  | "pending"
+  | "failed"
+  | "active"
+  | "paused";
+type NodeType = "peer" | "orderer" | "ca";
+type TransactionType =
+  | "product-creation"
+  | "product-transfer"
+  | "payment"
+  | "consensus"
+  | "audit";
+type AlertType = "warning" | "error" | "info";
+
+export default function EnhancedBlockchainExpertDashboard() {
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Dashboard data state
+  const [dashboardData, setDashboardData] = useState({
+    networkHealth: {
+      totalNodes: 12,
+      onlineNodes: 10,
+      syncingNodes: 1,
+      offlineNodes: 1,
+      averageBlockTime: 2.3,
+      transactionThroughput: 1247,
+      networkLatency: 45.2,
+      consensusHealth: 98.5,
+      faultTolerance: 85,
+    },
+    systemHealth: {
+      cpuUsage: 67,
+      memoryUsage: 72,
+      diskUsage: 45,
+      networkIO: 38,
+      blockProcessing: 94,
+      consensusEfficiency: 97,
+      overallHealth: 86,
+    },
+    security: {
+      securityScore: 95,
+      activeThreat: 2,
+      encryption: "AES-256",
+      lastScan: "15m ago",
+      activeAlerts: 3,
+      keyRotation: true,
+    },
+    consensus: {
+      status: "active" as StatusType,
+      algorithm: "PBFT",
+      blockTime: 5,
+      batchSize: 100,
+      participatingNodes: 10,
+    },
+    transactions: {
+      total: 15847,
+      confirmed: 15234,
+      pending: 45,
+      failed: 12,
+      last24h: 1247,
+      tps: 157,
+    },
+  });
+
+  // Recent transactions state
+  const [recentTransactions, setRecentTransactions] = useState([
+    {
+      id: "tx_001",
+      txId: "0x1234567890abcdef",
+      type: "product-creation" as TransactionType,
+      status: "confirmed" as StatusType,
+      from: "supplier_abc123",
+      to: "vendor_def456",
+      value: "25.99 HLFC",
+      timestamp: new Date(Date.now() - 2 * 60 * 1000).toISOString(),
+      blockNumber: 15847,
+      productName: "Organic Coffee Beans",
+    },
+    {
+      id: "tx_002",
+      txId: "0x2345678901bcdef0",
+      type: "payment" as TransactionType,
+      status: "confirmed" as StatusType,
+      from: "vendor_def456",
+      to: "customer_ghi789",
+      value: "199.99 HLFC",
+      timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+      blockNumber: 15846,
+      productName: null,
+    },
+    {
+      id: "tx_003",
+      txId: "0x3456789012cdef12",
+      type: "consensus" as TransactionType,
+      status: "pending" as StatusType,
+      from: "peer_node_01",
+      to: "orderer_node",
+      value: "0 HLFC",
+      timestamp: new Date(Date.now() - 1 * 60 * 1000).toISOString(),
+      blockNumber: 15848,
+      productName: null,
+    },
+  ]);
+
+  // Network nodes state
+  const [networkNodes, setNetworkNodes] = useState([
+    {
+      id: "peer0.org1.supply.com",
+      name: "Peer 0 - Supplier Org",
+      type: "peer" as NodeType,
+      status: "online" as StatusType,
+      health: 95,
+      lastSeen: "30s ago",
+      blockHeight: 15847,
+    },
+    {
+      id: "peer1.org2.vendor.com",
+      name: "Peer 1 - Vendor Org",
+      type: "peer" as NodeType,
+      status: "online" as StatusType,
+      health: 89,
+      lastSeen: "45s ago",
+      blockHeight: 15847,
+    },
+    {
+      id: "orderer.supply.com",
+      name: "Orderer Node",
+      type: "orderer" as NodeType,
+      status: "online" as StatusType,
+      health: 98,
+      lastSeen: "15s ago",
+      blockHeight: 15847,
+    },
+    {
+      id: "peer0.org3.ministry.com",
+      name: "Peer 0 - Ministry Org",
+      type: "peer" as NodeType,
+      status: "syncing" as StatusType,
+      health: 76,
+      lastSeen: "2m ago",
+      blockHeight: 15845,
+    },
+    {
+      id: "ca.supply.com",
+      name: "Certificate Authority",
+      type: "ca" as NodeType,
+      status: "offline" as StatusType,
+      health: 0,
+      lastSeen: "5m ago",
+      blockHeight: 15840,
+    },
+  ]);
+
+  // System alerts
+  const [systemAlerts, setSystemAlerts] = useState([
+    {
+      id: "alert_001",
+      type: "warning" as AlertType,
+      message: "Node peer0.org3.ministry.com is behind by 2 blocks",
+      timestamp: "2m ago",
+      severity: "medium",
+    },
+    {
+      id: "alert_002",
+      type: "info" as AlertType,
+      message: "Block 15847 confirmed by all peers",
+      timestamp: "5m ago",
+      severity: "low",
+    },
+    {
+      id: "alert_003",
+      type: "error" as AlertType,
+      message: "CA node offline - certificate services affected",
+      timestamp: "5m ago",
+      severity: "high",
+    },
+  ]);
 
   useEffect(() => {
-    loadDashboardData()
-  }, [])
+    // Simulate real-time updates
+    const interval = setInterval(() => {
+      setDashboardData((prev) => ({
+        ...prev,
+        networkHealth: {
+          ...prev.networkHealth,
+          transactionThroughput: 1200 + Math.floor(Math.random() * 100),
+          networkLatency: 40 + Math.floor(Math.random() * 20),
+        },
+        transactions: {
+          ...prev.transactions,
+          tps: 150 + Math.floor(Math.random() * 20),
+        },
+      }));
+    }, 10000);
 
-  const loadDashboardData = async () => {
-    setIsLoading(true)
-    try {
-      // Mock data - replace with real blockchain API calls later
-      const mockTransactions: BlockchainTransaction[] = [
-        {
-          id: '1',
-          hash: '0x1234567890abcdef1234567890abcdef12345678',
-          from: '0xabc123def456789abc123def456789abc123def4',
-          to: '0xdef456789abc123def456789abc123def456789a',
-          value: '25.99',
-          gasUsed: '21000',
-          gasPrice: '20',
-          blockNumber: 12345678,
-          timestamp: new Date(Date.now() - 2 * 60 * 1000).toISOString(),
-          type: 'product-creation',
-          status: 'confirmed',
-          metadata: {
-            productId: 'prod_001',
-            productName: 'Organic Coffee Beans'
-          }
-        },
-        {
-          id: '2',
-          hash: '0x2345678901bcdef02345678901bcdef023456789',
-          from: '0xbcd234ef567890bcd234ef567890bcd234ef56',
-          to: '0xef567890bcd234ef567890bcd234ef567890bc',
-          value: '199.99',
-          gasUsed: '45000',
-          gasPrice: '22',
-          blockNumber: 12345679,
-          timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-          type: 'payment',
-          status: 'confirmed',
-          metadata: {
-            orderId: 'order_001',
-            paymentMethod: 'crypto'
-          }
-        },
-        {
-          id: '3',
-          hash: '0x3456789012cdef13456789012cdef1345678901',
-          from: '0xcde345f678901cde345f678901cde345f678901',
-          to: '0xf678901cde345f678901cde345f678901cde345',
-          value: '0',
-          gasUsed: '65000',
-          gasPrice: '18',
-          blockNumber: 12345680,
-          timestamp: new Date(Date.now() - 1 * 60 * 1000).toISOString(),
-          type: 'consensus',
-          status: 'pending',
-          metadata: {
-            consensusType: 'block_validation'
-          }
-        }
-      ]
-
-      const mockNodes: ConsensusNode[] = [
-        {
-          id: 'peer0.org1.example.com',
-          name: 'Peer 0 - Organization 1',
-          type: 'peer',
-          status: 'online',
-          lastSeen: new Date(Date.now() - 30 * 1000).toISOString(),
-          blockHeight: 12345680,
-          version: '2.4.1'
-        },
-        {
-          id: 'peer1.org1.example.com',
-          name: 'Peer 1 - Organization 1',
-          type: 'peer',
-          status: 'online',
-          lastSeen: new Date(Date.now() - 45 * 1000).toISOString(),
-          blockHeight: 12345680,
-          version: '2.4.1'
-        },
-        {
-          id: 'orderer.example.com',
-          name: 'Orderer Node',
-          type: 'orderer',
-          status: 'online',
-          lastSeen: new Date(Date.now() - 15 * 1000).toISOString(),
-          blockHeight: 12345680,
-          version: '2.4.1'
-        },
-        {
-          id: 'ca.org1.example.com',
-          name: 'Certificate Authority',
-          type: 'ca',
-          status: 'online',
-          lastSeen: new Date(Date.now() - 60 * 1000).toISOString(),
-          blockHeight: 0,
-          version: '1.5.2'
-        },
-        {
-          id: 'peer0.org2.example.com',
-          name: 'Peer 0 - Organization 2',
-          type: 'peer',
-          status: 'syncing',
-          lastSeen: new Date(Date.now() - 120 * 1000).toISOString(),
-          blockHeight: 12345675,
-          version: '2.4.0'
-        }
-      ]
-
-      const mockNetworkHealth: NetworkHealth = {
-        totalNodes: mockNodes.length,
-        onlineNodes: mockNodes.filter(n => n.status === 'online').length,
-        offlineNodes: mockNodes.filter(n => n.status === 'offline').length,
-        syncingNodes: mockNodes.filter(n => n.status === 'syncing').length,
-        averageBlockTime: 2.3,
-        transactionThroughput: 1247,
-        networkLatency: 45.2
-      }
-
-      setTransactions(mockTransactions)
-      setNodes(mockNodes)
-      setNetworkHealth(mockNetworkHealth)
-    } catch (error) {
-      toast.error('Failed to load blockchain data')
-    } finally {
-      setIsLoading(false)
-    }
-  }
+    return () => clearInterval(interval);
+  }, []);
 
   const handleRefreshData = () => {
-    toast.success('Refreshing blockchain data...')
-    loadDashboardData()
-  }
+    setIsLoading(true);
+    setTimeout(() => {
+      // Simulate data refresh
+      setDashboardData((prev) => ({
+        ...prev,
+        networkHealth: {
+          ...prev.networkHealth,
+          transactionThroughput: 1200 + Math.floor(Math.random() * 100),
+          networkLatency: 40 + Math.floor(Math.random() * 20),
+        },
+      }));
+      setIsLoading(false);
+    }, 1000);
+  };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'online': return 'bg-green-100 text-green-800'
-      case 'offline': return 'bg-red-100 text-red-800'
-      case 'syncing': return 'bg-yellow-100 text-yellow-800'
-      case 'confirmed': return 'bg-green-100 text-green-800'
-      case 'pending': return 'bg-yellow-100 text-yellow-800'
-      case 'failed': return 'bg-red-100 text-red-800'
-      default: return 'bg-gray-100 text-gray-800'
-    }
-  }
+  const handleConsensusAction = (action: string) => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setDashboardData((prev) => ({
+        ...prev,
+        consensus: {
+          ...prev.consensus,
+          status: (action === "pause"
+            ? "paused"
+            : action === "restart"
+              ? "syncing"
+              : "active") as StatusType,
+        },
+      }));
+      setIsLoading(false);
+    }, 1000);
+  };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'online':
-      case 'confirmed': return <CheckCircle className="h-4 w-4" />
-      case 'offline':
-      case 'failed': return <XCircle className="h-4 w-4" />
-      case 'syncing':
-      case 'pending': return <Clock className="h-4 w-4" />
-      default: return <Clock className="h-4 w-4" />
-    }
-  }
+  const getStatusBadge = (status: StatusType) => {
+    const variants: Record<StatusType, string> = {
+      online: "bg-green-100 text-green-800",
+      offline: "bg-red-100 text-red-800",
+      syncing: "bg-yellow-100 text-yellow-800",
+      confirmed: "bg-green-100 text-green-800",
+      pending: "bg-yellow-100 text-yellow-800",
+      failed: "bg-red-100 text-red-800",
+      active: "bg-green-100 text-green-800",
+      paused: "bg-yellow-100 text-yellow-800",
+    };
 
-  const getNodeTypeIcon = (type: string) => {
-    switch (type) {
-      case 'peer': return <Server className="h-5 w-5" />
-      case 'orderer': return <Network className="h-5 w-5" />
-      case 'ca': return <Shield className="h-5 w-5" />
-      default: return <Database className="h-5 w-5" />
-    }
-  }
+    const icons: Record<
+      StatusType,
+      React.ComponentType<{ className?: string }>
+    > = {
+      online: CheckCircle,
+      offline: XCircle,
+      syncing: Clock,
+      confirmed: CheckCircle,
+      pending: Clock,
+      failed: XCircle,
+      active: Play,
+      paused: Pause,
+    };
 
-  const getTransactionTypeColor = (type: string) => {
-    switch (type) {
-      case 'product-creation': return 'bg-blue-100 text-blue-800'
-      case 'product-transfer': return 'bg-purple-100 text-purple-800'
-      case 'payment': return 'bg-green-100 text-green-800'
-      case 'consensus': return 'bg-orange-100 text-orange-800'
-      case 'audit': return 'bg-red-100 text-red-800'
-      default: return 'bg-gray-100 text-gray-800'
-    }
-  }
+    const Icon = icons[status];
 
-  if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    )
-  }
+      <Badge className={variants[status]}>
+        <Icon className="h-3 w-3 mr-1" />
+        {status}
+      </Badge>
+    );
+  };
+
+  const getNodeTypeIcon = (type: NodeType) => {
+    const icons: Record<
+      NodeType,
+      React.ComponentType<{ className?: string }>
+    > = {
+      peer: Server,
+      orderer: Network,
+      ca: Shield,
+    };
+    const Icon = icons[type] || Database;
+    return <Icon className="h-4 w-4" />;
+  };
+
+  const getTransactionTypeColor = (type: TransactionType) => {
+    const colors: Record<TransactionType, string> = {
+      "product-creation": "bg-blue-100 text-blue-800",
+      "product-transfer": "bg-purple-100 text-purple-800",
+      payment: "bg-green-100 text-green-800",
+      consensus: "bg-orange-100 text-orange-800",
+      audit: "bg-red-100 text-red-800",
+    };
+    return colors[type] || "bg-gray-100 text-gray-800";
+  };
+
+  const getHealthColor = (health: number) => {
+    if (health >= 90) return "text-green-600";
+    if (health >= 70) return "text-yellow-600";
+    return "text-red-600";
+  };
+
+  const getAlertIcon = (type: AlertType) => {
+    const icons: Record<
+      AlertType,
+      React.ComponentType<{ className?: string }>
+    > = {
+      warning: AlertTriangle,
+      error: XCircle,
+      info: CheckCircle,
+    };
+    const Icon = icons[type];
+    return <Icon className="h-4 w-4" />;
+  };
 
   return (
     <div className="space-y-6">
@@ -223,117 +373,339 @@ export default function BlockchainExpertDashboard() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Blockchain Expert Dashboard</h1>
-          <p className="text-muted-foreground">Network monitoring and administration - {user?.name}</p>
+          <p className="text-muted-foreground">
+            Comprehensive network monitoring and administration
+          </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={handleRefreshData} className="flex items-center gap-2">
-            <RefreshCw className="h-4 w-4" />
+          <Button
+            variant="outline"
+            onClick={handleRefreshData}
+            disabled={isLoading}
+          >
+            <RefreshCw
+              className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
+            />
             Refresh
           </Button>
-          <Button className="flex items-center gap-2">
-            <Settings className="h-4 w-4" />
+          <Button>
+            <Settings className="h-4 w-4 mr-2" />
             Settings
           </Button>
         </div>
       </div>
 
-      {/* Network Health Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Key Metrics Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Network Nodes</CardTitle>
-            <Server className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{networkHealth?.totalNodes || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              {networkHealth?.onlineNodes || 0} online, {networkHealth?.syncingNodes || 0} syncing
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Network Health
+                </p>
+                <p className="text-2xl font-bold">
+                  {dashboardData.systemHealth.overallHealth}%
+                </p>
+              </div>
+              <Activity className="h-8 w-8 text-green-600" />
+            </div>
+            <Progress
+              value={dashboardData.systemHealth.overallHealth}
+              className="mt-2"
+            />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Online Nodes
+                </p>
+                <p className="text-2xl font-bold text-green-600">
+                  {dashboardData.networkHealth.onlineNodes}/
+                  {dashboardData.networkHealth.totalNodes}
+                </p>
+              </div>
+              <Server className="h-8 w-8 text-green-600" />
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {Math.round(
+                (dashboardData.networkHealth.onlineNodes /
+                  dashboardData.networkHealth.totalNodes) *
+                  100
+              )}
+              % operational
             </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Block Time</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{networkHealth?.averageBlockTime || 0}s</div>
-            <p className="text-xs text-muted-foreground">
-              Average block time
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">TPS</p>
+                <p className="text-2xl font-bold text-blue-600">
+                  {dashboardData.transactions.tps}
+                </p>
+              </div>
+              <Zap className="h-8 w-8 text-blue-600" />
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Transactions per second
             </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Throughput</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{networkHealth?.transactionThroughput || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              Transactions per hour
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Security Score
+                </p>
+                <p className="text-2xl font-bold text-purple-600">
+                  {dashboardData.security.securityScore}/100
+                </p>
+              </div>
+              <Shield className="h-8 w-8 text-purple-600" />
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Last scan: {dashboardData.security.lastScan}
             </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Network Latency</CardTitle>
-            <Network className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{networkHealth?.networkLatency || 0}ms</div>
-            <p className="text-xs text-muted-foreground">
-              Average latency
-            </p>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Consensus
+                </p>
+                <p className="text-2xl font-bold">
+                  {dashboardData.consensus.algorithm}
+                </p>
+              </div>
+              <Users className="h-8 w-8 text-orange-600" />
+            </div>
+            <div className="mt-1">
+              {getStatusBadge(dashboardData.consensus.status)}
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Main Content Tabs */}
-      <Tabs defaultValue="monitoring" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="monitoring">Network Monitor</TabsTrigger>
+      {/* Detailed Tabs */}
+      <Tabs defaultValue="overview" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-6">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="nodes">Network Nodes</TabsTrigger>
           <TabsTrigger value="transactions">Transactions</TabsTrigger>
           <TabsTrigger value="consensus">Consensus</TabsTrigger>
           <TabsTrigger value="security">Security</TabsTrigger>
+          <TabsTrigger value="system">System Health</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="monitoring" className="space-y-4">
+        <TabsContent value="overview" className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Network Statistics */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Network Performance</CardTitle>
+                <CardDescription>Real-time network metrics</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Throughput</span>
+                  <span className="font-medium">
+                    {dashboardData.networkHealth.transactionThroughput} tx/h
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Latency</span>
+                  <span className="font-medium">
+                    {dashboardData.networkHealth.networkLatency}ms
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Block Time</span>
+                  <span className="font-medium">
+                    {dashboardData.networkHealth.averageBlockTime}s
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Consensus Health</span>
+                  <span className="font-medium">
+                    {dashboardData.networkHealth.consensusHealth}%
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* System Alerts */}
+            <Card>
+              <CardHeader>
+                <CardTitle>System Alerts</CardTitle>
+                <CardDescription>
+                  Recent alerts and notifications
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {systemAlerts.map((alert) => (
+                    <div
+                      key={alert.id}
+                      className={`flex items-start gap-3 p-3 rounded-lg border ${
+                        alert.severity === "high"
+                          ? "bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800"
+                          : alert.severity === "medium"
+                            ? "bg-yellow-50 dark:bg-yellow-950 border-yellow-200 dark:border-yellow-800"
+                            : "bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800"
+                      }`}
+                    >
+                      <div className="mt-0.5">{getAlertIcon(alert.type)}</div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">{alert.message}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {alert.timestamp}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Transaction Summary */}
           <Card>
             <CardHeader>
-              <CardTitle>Network Nodes Status</CardTitle>
+              <CardTitle>Transaction Summary</CardTitle>
               <CardDescription>
-                Monitor the status and health of all network nodes
+                Transaction statistics and recent activity
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div className="text-center p-4 bg-green-50 dark:bg-green-950 rounded-lg">
+                  <div className="text-2xl font-bold text-green-600">
+                    {dashboardData.transactions.confirmed}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Confirmed</div>
+                </div>
+                <div className="text-center p-4 bg-yellow-50 dark:bg-yellow-950 rounded-lg">
+                  <div className="text-2xl font-bold text-yellow-600">
+                    {dashboardData.transactions.pending}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Pending</div>
+                </div>
+                <div className="text-center p-4 bg-red-50 dark:bg-red-950 rounded-lg">
+                  <div className="text-2xl font-bold text-red-600">
+                    {dashboardData.transactions.failed}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Failed</div>
+                </div>
+                <div className="text-center p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                  <div className="text-2xl font-bold text-blue-600">
+                    {dashboardData.transactions.last24h}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Last 24h</div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <h4 className="font-medium">Recent Transactions</h4>
+                {recentTransactions.map((tx) => (
+                  <div
+                    key={tx.id}
+                    className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Badge className={getTransactionTypeColor(tx.type)}>
+                        {tx.type}
+                      </Badge>
+                      <div>
+                        <div className="font-mono text-sm">
+                          {tx.txId.slice(0, 10)}...{tx.txId.slice(-6)}
+                        </div>
+                        {tx.productName && (
+                          <div className="text-xs text-muted-foreground">
+                            {tx.productName}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {getStatusBadge(tx.status)}
+                      <span className="font-medium">{tx.value}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="nodes" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Network Nodes ({networkNodes.length})</CardTitle>
+              <CardDescription>
+                Monitor all network nodes and their health status
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {nodes.map((node) => (
-                  <div key={node.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center space-x-4">
+                {networkNodes.map((node) => (
+                  <div
+                    key={node.id}
+                    className="flex items-center justify-between p-4 border rounded-lg"
+                  >
+                    <div className="flex items-center gap-4">
                       <div className="p-2 bg-muted rounded-lg">
                         {getNodeTypeIcon(node.type)}
                       </div>
                       <div>
                         <h3 className="font-semibold">{node.name}</h3>
-                        <p className="text-sm text-muted-foreground">{node.id}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {node.id}
+                        </p>
                         <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="outline" className="capitalize">{node.type}</Badge>
-                          <Badge className={getStatusColor(node.status)}>
-                            {getStatusIcon(node.status)}
-                            <span className="ml-1">{node.status}</span>
+                          <Badge variant="outline" className="capitalize">
+                            {node.type}
                           </Badge>
+                          {getStatusBadge(node.status)}
                         </div>
                       </div>
                     </div>
                     <div className="text-right space-y-1">
-                      <p className="text-sm font-medium">Block: {node.blockHeight.toLocaleString()}</p>
-                      <p className="text-xs text-muted-foreground">Version: {node.version}</p>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`text-sm font-medium ${getHealthColor(node.health)}`}
+                        >
+                          {node.health}%
+                        </span>
+                        <div className="w-16 h-2 bg-muted rounded-full overflow-hidden">
+                          <div
+                            className={`h-full transition-all ${
+                              node.health >= 90
+                                ? "bg-green-500"
+                                : node.health >= 70
+                                  ? "bg-yellow-500"
+                                  : "bg-red-500"
+                            }`}
+                            style={{ width: `${node.health}%` }}
+                          />
+                        </div>
+                      </div>
                       <p className="text-xs text-muted-foreground">
-                        Last seen: {new Date(node.lastSeen).toLocaleTimeString()}
+                        Block: {node.blockHeight}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Last seen: {node.lastSeen}
                       </p>
                     </div>
                   </div>
@@ -341,140 +713,80 @@ export default function BlockchainExpertDashboard() {
               </div>
             </CardContent>
           </Card>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Network Health</CardTitle>
-                <CardDescription>Overall network performance metrics</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Online Nodes</span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-24 bg-muted rounded-full h-2">
-                        <div 
-                          className="bg-green-500 h-2 rounded-full"
-                          style={{ 
-                            width: `${(networkHealth?.onlineNodes || 0) / (networkHealth?.totalNodes || 1) * 100}%` 
-                          }}
-                        ></div>
-                      </div>
-                      <span className="text-sm font-medium">
-                        {networkHealth?.onlineNodes}/{networkHealth?.totalNodes}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Network Latency</span>
-                    <span className="text-sm font-medium">{networkHealth?.networkLatency}ms</span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Block Time</span>
-                    <span className="text-sm font-medium">{networkHealth?.averageBlockTime}s</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>System Alerts</CardTitle>
-                <CardDescription>Recent system alerts and warnings</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-start gap-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium">Node Syncing</p>
-                      <p className="text-xs text-muted-foreground">
-                        peer0.org2.example.com is behind by 5 blocks
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium">Consensus Reached</p>
-                      <p className="text-xs text-muted-foreground">
-                        Block 12345680 confirmed by all peers
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
         </TabsContent>
 
         <TabsContent value="transactions" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Recent Transactions</CardTitle>
+              <CardTitle>Transaction Management</CardTitle>
               <CardDescription>
-                Monitor all blockchain transactions in real-time
+                View and manage blockchain transactions
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {transactions.map((tx) => (
+              <div className="flex justify-between items-center mb-4">
+                <div className="flex gap-2">
+                  <Button variant="outline">
+                    <Eye className="h-4 w-4 mr-2" />
+                    View All
+                  </Button>
+                  <Button variant="outline">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export
+                  </Button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm">
+                    Live: {dashboardData.transactions.pending} pending
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {recentTransactions.map((tx) => (
                   <div key={tx.id} className="p-4 border rounded-lg">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-3">
                         <code className="text-sm bg-muted px-2 py-1 rounded">
-                          {tx.hash.slice(0, 10)}...{tx.hash.slice(-6)}
+                          {tx.txId.slice(0, 10)}...{tx.txId.slice(-6)}
                         </code>
                         <Badge className={getTransactionTypeColor(tx.type)}>
                           {tx.type}
                         </Badge>
-                        <Badge className={getStatusColor(tx.status)}>
-                          {getStatusIcon(tx.status)}
-                          <span className="ml-1">{tx.status}</span>
-                        </Badge>
+                        {getStatusBadge(tx.status)}
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-medium">Block: {tx.blockNumber.toLocaleString()}</p>
+                        <p className="text-sm font-medium">
+                          Block: {tx.blockNumber}
+                        </p>
                         <p className="text-xs text-muted-foreground">
                           {new Date(tx.timestamp).toLocaleTimeString()}
                         </p>
                       </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
                         <span className="text-muted-foreground">From: </span>
-                        <code className="text-xs">{tx.from.slice(0, 10)}...{tx.from.slice(-6)}</code>
+                        <code className="text-xs">{tx.from}</code>
                       </div>
                       <div>
                         <span className="text-muted-foreground">To: </span>
-                        <code className="text-xs">{tx.to.slice(0, 10)}...{tx.to.slice(-6)}</code>
+                        <code className="text-xs">{tx.to}</code>
                       </div>
                       <div>
                         <span className="text-muted-foreground">Value: </span>
-                        <span className="font-medium">{tx.value} ETH</span>
+                        <span className="font-medium">{tx.value}</span>
                       </div>
-                      <div>
-                        <span className="text-muted-foreground">Gas: </span>
-                        <span>{tx.gasUsed} / {tx.gasPrice} gwei</span>
-                      </div>
-                    </div>
-
-                    {tx.metadata && Object.keys(tx.metadata).length > 0 && (
-                      <div className="mt-3 p-2 bg-muted rounded text-xs">
-                        <strong>Metadata:</strong> {JSON.stringify(tx.metadata, null, 2)}
-                      </div>
-                    )}
-
-                    <div className="flex justify-end mt-3">
-                      <Button variant="outline" size="sm">
-                        <Eye className="h-4 w-4 mr-2" />
-                        View Details
-                      </Button>
+                      {tx.productName && (
+                        <div>
+                          <span className="text-muted-foreground">
+                            Product:{" "}
+                          </span>
+                          <span className="font-medium">{tx.productName}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -488,27 +800,94 @@ export default function BlockchainExpertDashboard() {
             <CardHeader>
               <CardTitle>Consensus Management</CardTitle>
               <CardDescription>
-                Monitor and manage the consensus mechanism
+                Monitor and control consensus protocol
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-12">
-                <Network className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Consensus Protocol</h3>
-                <p className="text-muted-foreground mb-4">
-                  Advanced consensus management tools coming soon
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-md mx-auto">
-                  <Button variant="outline" disabled>
-                    Configure Policies
-                  </Button>
-                  <Button variant="outline" disabled>
-                    Validate Blocks
-                  </Button>
-                  <Button variant="outline" disabled>
-                    Network Settings
-                  </Button>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <h4 className="font-medium">Consensus Controls</h4>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => handleConsensusAction("start")}
+                      disabled={
+                        dashboardData.consensus.status === "active" || isLoading
+                      }
+                      size="sm"
+                    >
+                      <Play className="w-4 h-4 mr-2" />
+                      Start
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => handleConsensusAction("pause")}
+                      disabled={
+                        dashboardData.consensus.status === "paused" || isLoading
+                      }
+                      size="sm"
+                    >
+                      <Pause className="w-4 h-4 mr-2" />
+                      Pause
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => handleConsensusAction("restart")}
+                      disabled={isLoading}
+                      size="sm"
+                    >
+                      <RotateCcw className="w-4 h-4 mr-2" />
+                      Restart
+                    </Button>
+                  </div>
                 </div>
+
+                <div className="space-y-4">
+                  <h4 className="font-medium">Consensus Settings</h4>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Algorithm:</span>
+                      <span className="font-medium">
+                        {dashboardData.consensus.algorithm}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Block Time:</span>
+                      <span className="font-medium">
+                        {dashboardData.consensus.blockTime}s
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Batch Size:</span>
+                      <span className="font-medium">
+                        {dashboardData.consensus.batchSize}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">
+                        Participating:
+                      </span>
+                      <span className="font-medium">
+                        {dashboardData.consensus.participatingNodes} nodes
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-blue-600" />
+                  <h4 className="font-medium text-blue-900 dark:text-blue-100">
+                    Byzantine Fault Tolerance
+                  </h4>
+                </div>
+                <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                  Network can tolerate up to{" "}
+                  {Math.floor(
+                    (dashboardData.networkHealth.onlineNodes - 1) / 3
+                  )}{" "}
+                  faulty nodes while maintaining consensus integrity.
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -517,34 +896,284 @@ export default function BlockchainExpertDashboard() {
         <TabsContent value="security" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Security Management</CardTitle>
+              <CardTitle>Security Status</CardTitle>
               <CardDescription>
-                Network security monitoring and configuration
+                Network security monitoring and management
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-12">
-                <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Security Center</h3>
-                <p className="text-muted-foreground mb-4">
-                  Advanced security monitoring and management tools coming soon
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-md mx-auto">
-                  <Button variant="outline" disabled>
-                    Access Control
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-4">
+                  <h4 className="font-medium">Security Score</h4>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-green-600">
+                      {dashboardData.security.securityScore}/100
+                    </div>
+                    <Progress
+                      value={dashboardData.security.securityScore}
+                      className="mt-2"
+                    />
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Last scan: {dashboardData.security.lastScan}
+                    </p>
+                  </div>
+                  <Button className="w-full">
+                    <Shield className="w-4 h-4 mr-2" />
+                    Run Security Scan
                   </Button>
-                  <Button variant="outline" disabled>
-                    Audit Logs
-                  </Button>
-                  <Button variant="outline" disabled>
-                    Key Management
+                </div>
+
+                <div className="space-y-4">
+                  <h4 className="font-medium">Active Threats</h4>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-red-600">
+                      {dashboardData.security.activeThreat}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Detected threats
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span>Intrusion attempts</span>
+                      <Badge variant="destructive">1</Badge>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span>Suspicious activity</span>
+                      <Badge variant="outline">1</Badge>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h4 className="font-medium">Encryption Status</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Algorithm</span>
+                      <Badge variant="default">
+                        {dashboardData.security.encryption}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Key Rotation</span>
+                      <Badge
+                        variant={
+                          dashboardData.security.keyRotation
+                            ? "default"
+                            : "outline"
+                        }
+                      >
+                        {dashboardData.security.keyRotation
+                          ? "Enabled"
+                          : "Disabled"}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">TLS Version</span>
+                      <Badge variant="default">1.3</Badge>
+                    </div>
+                  </div>
+                  <Button variant="outline" className="w-full">
+                    <Key className="w-4 h-4 mr-2" />
+                    Manage Keys
                   </Button>
                 </div>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="system" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>System Health Metrics</CardTitle>
+              <CardDescription>
+                Monitor system performance and resource usage
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="p-4 border rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Cpu className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium">CPU Usage</span>
+                    </div>
+                    <span
+                      className={`font-bold ${getHealthColor(100 - dashboardData.systemHealth.cpuUsage)}`}
+                    >
+                      {dashboardData.systemHealth.cpuUsage}%
+                    </span>
+                  </div>
+                  <Progress value={dashboardData.systemHealth.cpuUsage} />
+                </div>
+
+                <div className="p-4 border rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Database className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium">Memory Usage</span>
+                    </div>
+                    <span
+                      className={`font-bold ${getHealthColor(100 - dashboardData.systemHealth.memoryUsage)}`}
+                    >
+                      {dashboardData.systemHealth.memoryUsage}%
+                    </span>
+                  </div>
+                  <Progress value={dashboardData.systemHealth.memoryUsage} />
+                </div>
+
+                <div className="p-4 border rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <HardDrive className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium">Disk Usage</span>
+                    </div>
+                    <span
+                      className={`font-bold ${getHealthColor(100 - dashboardData.systemHealth.diskUsage)}`}
+                    >
+                      {dashboardData.systemHealth.diskUsage}%
+                    </span>
+                  </div>
+                  <Progress value={dashboardData.systemHealth.diskUsage} />
+                </div>
+
+                <div className="p-4 border rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Wifi className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium">Network I/O</span>
+                    </div>
+                    <span className="font-bold text-blue-600">
+                      {dashboardData.systemHealth.networkIO} MB/s
+                    </span>
+                  </div>
+                  <Progress value={dashboardData.systemHealth.networkIO} />
+                </div>
+
+                <div className="p-4 border rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Server className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium">Block Processing</span>
+                    </div>
+                    <span
+                      className={`font-bold ${getHealthColor(dashboardData.systemHealth.blockProcessing)}`}
+                    >
+                      {dashboardData.systemHealth.blockProcessing}%
+                    </span>
+                  </div>
+                  <Progress
+                    value={dashboardData.systemHealth.blockProcessing}
+                  />
+                </div>
+
+                <div className="p-4 border rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Network className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium">Consensus Efficiency</span>
+                    </div>
+                    <span
+                      className={`font-bold ${getHealthColor(dashboardData.systemHealth.consensusEfficiency)}`}
+                    >
+                      {dashboardData.systemHealth.consensusEfficiency}%
+                    </span>
+                  </div>
+                  <Progress
+                    value={dashboardData.systemHealth.consensusEfficiency}
+                  />
+                </div>
+              </div>
+
+              {/* Fault Tolerance Section */}
+              <div className="mt-6 p-4 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-800">
+                <div className="flex items-center justify-between mb-2">
+<h4 className="font-medium text-green-900 dark:text-green-100">Fault Tolerance</h4>
+
+                  <span className="text-2xl font-bold text-green-600">
+                    {dashboardData.networkHealth.faultTolerance}%
+                  </span>
+                </div>
+                <Progress
+                  value={dashboardData.networkHealth.faultTolerance}
+                  className="mb-2"
+                />
+                <div className="grid grid-cols-3 gap-4 text-sm">
+                  <div className="text-center">
+<div className="font-medium text-green-700 dark:text-green-300">Recovery Time</div>
+
+<div className="text-green-600 dark:text-green-400"> 2 min</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="font-medium text-green-700 dark:text-green-300">Data Loss</div>
+<div className="text-green-600 dark:text-green-400"> 10 sec</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="font-medium text-green-700 dark:text-green-300">MTTR</div>
+                    <div className="text-green-600 dark:text-green-400"> 45 sec</div>
+
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
+
+      {/* Quick Actions Footer */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Quick Actions</CardTitle>
+          <CardDescription>Common administrative tasks</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <Button variant="outline" className="h-20 flex flex-col gap-2">
+              <Monitor className="h-6 w-6" />
+              <span className="text-xs">View All Nodes</span>
+            </Button>
+            <Button variant="outline" className="h-20 flex flex-col gap-2">
+              <Hash className="h-6 w-6" />
+              <span className="text-xs">All Transactions</span>
+            </Button>
+            <Button variant="outline" className="h-20 flex flex-col gap-2">
+              <Shield className="h-6 w-6" />
+              <span className="text-xs">Security Scan</span>
+            </Button>
+            <Button variant="outline" className="h-20 flex flex-col gap-2">
+              <Settings className="h-6 w-6" />
+              <span className="text-xs">Consensus Config</span>
+            </Button>
+            <Button variant="outline" className="h-20 flex flex-col gap-2">
+              <Download className="h-6 w-6" />
+              <span className="text-xs">Export Logs</span>
+            </Button>
+            <Button variant="outline" className="h-20 flex flex-col gap-2">
+              <Activity className="h-6 w-6" />
+              <span className="text-xs">Health Report</span>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Real-time Status Bar */}
+      <div className="fixed bottom-4 right-4 bg-background border rounded-lg p-4 shadow-lg">
+        <div className="flex items-center gap-4 text-sm">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span>Network: Online</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+            <span>TPS: {dashboardData.transactions.tps}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
+            <span>Latency: {dashboardData.networkHealth.networkLatency}ms</span>
+          </div>
+        </div>
+      </div>
     </div>
-  )
+  );
 }
