@@ -48,6 +48,15 @@ export interface Product {
   dimensions?: string
   manufacturingDate?: string
   expiryDate?: string
+  tags?: string[]
+  brand?: string
+  model?: string
+  color?: string
+  material?: string
+  warranty?: string
+  certifications?: string
+  origin?: string
+  minimumOrderQuantity?: number
 }
 
 export type ProductStatus =

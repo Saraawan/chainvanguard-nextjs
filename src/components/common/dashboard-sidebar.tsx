@@ -54,9 +54,9 @@ export function DashboardSidebar() {
           { href: "/vendor/my-products", label: "My Products", icon: Package },
           { href: "/vendor/orders", label: "Orders", icon: ShoppingCart },
           { href: "/vendor/customers", label: "Customers", icon: Users },
-          { href: "/vendor/analytics", label: "Analytics", icon: TrendingUp },
+          { href: "/vendor/insights", label: "Analytics", icon: TrendingUp },
           {
-            href: "/vendor/sales-history",
+            href: "/vendor/history",
             label: "Sales History",
             icon: History,
           },
@@ -66,10 +66,10 @@ export function DashboardSidebar() {
       case "customer":
         return [
           { href: "/customer", label: "Dashboard", icon: Home },
-          { href: "/customer/browse", label: "Browse Products", icon: Package }, 
-          { href: "/customer/cart", label: "My Cart", icon: ShoppingCart }, 
-          { href: "/customer/orders", label: "My Orders", icon: ClipboardList }, 
-          { href: "/customer/history", label: "Order History", icon: History }, 
+          { href: "/customer/browse", label: "Browse Products", icon: Package },
+          { href: "/customer/cart", label: "My Cart", icon: ShoppingCart },
+          { href: "/customer/orders", label: "My Orders", icon: ClipboardList },
+          { href: "/customer/history", label: "Order History", icon: History },
         ];
 
       // 4. Blockchain Expert
