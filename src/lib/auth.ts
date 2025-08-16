@@ -1,4 +1,3 @@
-// src/lib/auth.ts
 import { User, UserRole, RegisterData } from '@/types'
 
 export class AuthService {

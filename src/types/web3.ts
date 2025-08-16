@@ -1,4 +1,3 @@
-// src/types/web3.ts
 
 export interface WalletData {
   id: string
