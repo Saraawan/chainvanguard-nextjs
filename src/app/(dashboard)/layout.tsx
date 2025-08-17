@@ -1,60 +1,113 @@
-'use client'
+"use client";
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAuth } from '@/components/providers/auth-provider'
-import { DashboardHeader } from '@/components/common/dashboard-header'
-import { DashboardSidebar } from '@/components/common/dashboard-sidebar'
-import { LoadingSpinner } from '@/components/common/loading-spinner'
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/components/providers/auth-provider";
+import { DashboardHeader } from "@/components/common/dashboard-header";
+import { DashboardSidebar } from "@/components/common/dashboard-sidebar";
+import { LoadingSpinner } from "@/components/common/loading-spinner";
 
 export default function DashboardLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
-  const { isAuthenticated, isLoading, user } = useAuth()
-  const router = useRouter()
+  const { isAuthenticated, isLoading, user } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
+    console.log("[LAYOUT] Dashboard Layout - Auth Check:", {
+      isLoading,
+      isAuthenticated,
+      userRole: user?.role,
+      userAddress: user?.walletAddress,
+    });
+
     // Wait until loading finishes
     if (!isLoading) {
       // If not authenticated, redirect to login
       if (!isAuthenticated) {
-        router.push('/login')
-        return
+        console.log("[LAYOUT] Not authenticated, redirecting to login");
+        router.push("/login");
+        return;
       }
 
-      // If user has no role yet, redirect to role selection
-      if (isAuthenticated && !user?.role) {
-        router.push('/role-selection')
-        return
+      // IMPORTANT: Check localStorage directly for role as backup
+      const savedUser = localStorage.getItem("chainvanguard_user");
+      let hasRole = user?.role;
+
+      if (!hasRole && savedUser) {
+        try {
+          const userData = JSON.parse(savedUser);
+          hasRole = userData.role;
+          console.log("[LAYOUT] Found role in localStorage:", hasRole);
+        } catch (error) {
+          console.error("[LAYOUT] Error parsing saved user:", error);
+        }
       }
+
+      // Only redirect to role selection if NO role found anywhere
+      if (isAuthenticated && !hasRole) {
+        console.log(
+          "[LAYOUT] User authenticated but no role found, redirecting to role selection"
+        );
+        router.push("/role-selection");
+        return;
+      }
+
+      console.log("[LAYOUT] User authenticated with role:", hasRole);
     }
-  }, [isAuthenticated, isLoading, user, router])
+  }, [isAuthenticated, isLoading, user?.role, router]);
 
   // Show loading spinner while auth/user is loading
-  if (isLoading || !user) {
+  if (isLoading) {
+    console.log("[LAYOUT] Dashboard loading...");
     return (
       <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner />
       </div>
-    )
+    );
   }
 
   // Fallback in case user is not authenticated
   if (!isAuthenticated) {
-    return null
+    console.log("[LAYOUT] Dashboard: User not authenticated");
+    return null;
   }
+
+  // Check if user has role (from state or localStorage)
+  let userRole = user?.role;
+  if (!userRole) {
+    const savedUser = localStorage.getItem("chainvanguard_user");
+    if (savedUser) {
+      try {
+        const userData = JSON.parse(savedUser);
+        userRole = userData.role;
+      } catch (error) {
+        console.error("[LAYOUT] Error parsing user data in layout:", error);
+      }
+    }
+  }
+
+  // If still no role found, return loading (the useEffect will handle redirect)
+  if (!userRole) {
+    console.log("[LAYOUT] Waiting for role to be available...");
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  console.log("[LAYOUT] Dashboard rendering for role:", userRole);
 
   return (
     <div className="min-h-screen bg-background">
       <DashboardHeader />
       <div className="flex">
         <DashboardSidebar />
-        <main className="flex-1 ml-64 p-6">
-          {children}
-        </main>
+        <main className="flex-1 ml-64 p-6">{children}</main>
       </div>
     </div>
-  )
+  );
 }
